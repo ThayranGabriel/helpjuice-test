@@ -3,7 +3,7 @@
 ## Description
 This project is part of a test. It includes a text editor with an H1 title functionality.
 
-#Notice:
+## Notice:
 It wasn't possible to match 100% to the Figma design because Figma is a static image. Therefore, I took the liberty to use other icons and make slight variations.
 
 ## Features
