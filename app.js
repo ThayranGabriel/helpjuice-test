@@ -1,6 +1,5 @@
 const blocks = document.getElementById("blocks");
 const editor = document.getElementById("the-editor-content");
-const anchor = document.getElementById("anchor");
 
 // Função para verificar a presença da barra no texto
 function checkForSlash() {
@@ -14,11 +13,39 @@ function checkForSlash() {
 }
 
 function checkForSlashOne() {
-  const text = editor.innerText;
-  if (text.includes("/1")) {
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return;
+
+  const range = selection.getRangeAt(0);
+  const startContainer = range.startContainer;
+
+  // Encontrar a linha atual (bloco de texto)
+  let currentNode = startContainer;
+  while (currentNode && currentNode !== editor) {
+    if (currentNode.nodeType === Node.ELEMENT_NODE && currentNode.tagName === 'DIV') {
+      break;
+    }
+    currentNode = currentNode.parentNode;
+  }
+
+  if (currentNode && currentNode.innerText.includes("/1")) {
     console.log("entrei aqui!");
-    editor.innerHTML = editor.innerHTML.replace("/1", " ");
-    doRichEditCommand('formatBlock', 'h1')
+
+    // Salvar a posição do cursor
+    const startOffset = range.startOffset;
+
+    // Substituir /1 por um espaço na linha atual
+    currentNode.innerHTML = currentNode.innerHTML.replace("/1", " ");
+
+    // Restaurar a posição do cursor
+    const newRange = document.createRange();
+    newRange.setStart(range.startContainer, startOffset - 2); // Ajustar a posição do cursor
+    newRange.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(newRange);
+
+    // Aplicar a formatação h1 na linha atual
+    document.execCommand('formatBlock', false, 'h1');
   }
 }
 
@@ -31,7 +58,6 @@ editor.addEventListener("input", function () {
 // Esconde o blocks quando a barra é removida ou espaço é pressionado após a barra
 editor.addEventListener("keydown", function (event) {
   if (
-    event.key === " " ||
     event.key === "Backspace" ||
     event.key === "Delete"
   ) {
@@ -47,14 +73,3 @@ document.addEventListener("keydown", function (event) {
     blocks.style.display = "block";
   }
 });
-
-anchor.addEventListener("click", function () {
-    console.log("Anchor pressionado");
-    blocks.style.display = "none";
-    doRichEditCommand('formatBlock', 'h1')
-});
-
-function doRichEditCommand(aName, aArg){
-    document.execCommand(aName,false, aArg);
-  }
-  
